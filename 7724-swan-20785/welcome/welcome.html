@@ -6,38 +6,31 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  
-  const urlParams = new URLSearchParams(window.location.search);
-  
-  // 1. EXTRACT ONLY PROTOCOL KEYS
-  const utmSource   = urlParams.get('utm_source') || 'mejia'; 
-  const utmMedium   = urlParams.get('utm_medium') || 'email'; 
-  const utmCampaign = urlParams.get('utm_campaign') || 'welcome';
-  const utmId       = urlParams.get('utm_id') || '7724-swan-20785';     
-  const utmContent  = urlParams.get('utm_content') || 'flores';
 
-  const pathArray = window.location.pathname.split('/');
-  const finalAssetId = utmId || '7724-swan-20785';
-  
-  // 2. CONFIG
+  // 1. FORCE CAPTURE FROM URL
+  const params = new URLSearchParams(window.location.search);
+  const liveSource = params.get('utm_source') || 'mejia_direct';
+  const liveCampaign = params.get('utm_campaign') || 'no_campaign';
+
+  // 2. KILL THE GHOSTS (Session Control)
   gtag('config', 'G-X889MYFV7L', {
-  'send_page_view': false,
-  'custom_map': {
-      'dimension1': 'asset_id', 
-      'dimension2': 'source', 
-      'dimension3': 'content',
-      'dimension4': 'medium'
-  }
-});
-  
-  // 3. THE CLEAN EVENT
+    'page_location': window.location.href,
+    'page_title': document.title,
+    'user_id': liveSource, // This pins the user to the source
+    'traffic_type': 'internal_test',
+    'campaign_id': params.get('utm_id') || '7724-swan-20785'
+  });
+
+  // 3. THE SUPREME EVENT (This shows up in Real-time)
   gtag('event', 'silo_view', {
-  'asset_id': finalAssetId,
-  'source': utmSource,
-  'medium': utmMedium,
-  'content': utmContent,
-  'campaign': utmCampaign
-});
+    'event_category': 'Engagement',
+    'event_label': liveCampaign,
+    'source': liveSource, // This is your 'mejia'
+    'medium': params.get('utm_medium') || 'email',
+    'asset_id': params.get('utm_id') || '7724-swan-20785',
+    'content': params.get('utm_content') || 'flores',
+    'non_interaction': false 
+  });
 </script>
 
   <meta charset="UTF-8">
