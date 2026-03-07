@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truth Engine: Neighborhood Dossier</title>
+    
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-X889MYFV7L"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -9,18 +13,16 @@
 
       const urlParams = new URLSearchParams(window.location.search);
       
-      // 1. EXTRACT PROTOCOL KEYS
       const utmSource   = urlParams.get('utm_source'); 
       const utmMedium   = urlParams.get('utm_medium'); 
-      const utmCampaign = urlParams.get('utm_campaign');
+      const utmCampaign = urlParams.get('utm_campaign') || 'phase_1';
       const utmId       = urlParams.get('utm_id');     
       const utmContent  = urlParams.get('utm_content');
 
       const pathArray = window.location.pathname.split('/');
-      // Logic to pull asset ID from URL or path
-      const finalAssetId = utmId || pathArray[pathArray.length - 3] || 'PRESTIGE_ASSET';
+      // Exposed globally for the footer script
+      window.finalAssetId = utmId || pathArray[pathArray.length - 3] || 'PRESTIGE_ASSET';
 
-      // 2. CONFIG: MAP DIMENSIONS & PAGE VIEW
       gtag('config', 'G-X889MYFV7L', {
         'send_page_view': true, 
         'custom_map': {
@@ -30,17 +32,14 @@
             'dimension4': 'medium',
             'dimension5': 'campaign'
         },
-        'asset_id': finalAssetId,
+        'asset_id': window.finalAssetId,
         'source': utmSource || 'direct',
         'medium': utmMedium || 'none',
         'content': utmContent || 'not_set',
-        'campaign': utmCampaign || 'phase_1'
+        'campaign': utmCampaign
       });
     </script>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Truth Engine: Neighborhood Dossier</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
     
@@ -282,29 +281,36 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Update Hero and Footer Displays
+            // Reference the global variable defined in <head>
+            const fAssetId = window.finalAssetId || 'PRESTIGE_ASSET';
+            const fCampaign = urlParams.get('utm_campaign') || 'phase_1';
+            const fSource = urlParams.get('utm_source') || 'direct';
+            const fMedium = urlParams.get('utm_medium') || 'web';
+            const fContent = urlParams.get('utm_content') || 'not_set';
+
+            // Update UI Displays
             const heroAsset = document.getElementById('hero-asset-id');
-            if (heroAsset && finalAssetId) {
-                heroAsset.innerText = finalAssetId.replace(/_/g, ' ');
+            if (heroAsset) {
+                heroAsset.innerText = fAssetId.replace(/_/g, ' ');
             }
 
             const authDisplay = document.getElementById('auth-display');
             if (authDisplay) {
-                authDisplay.innerText = `Source-ID: truthengine.io/briefing/auth_${finalAssetId || 'unverified'}`;
+                authDisplay.innerText = `Source-ID: truthengine.io/briefing/auth_${fAssetId}`;
             }
 
-            // Consult Button (Calendly)
+            // Consult Button
             const consultBtn = document.getElementById('dynamic-consult-btn');
             if(consultBtn) {
-                const trackingQuery = `?utm_source=${utmSource || 'direct'}&utm_medium=${utmMedium || 'web'}&utm_campaign=${utmCampaign || 'phase_1'}&utm_id=${finalAssetId}&utm_content=${utmContent || 'not_set'}`;
+                const trackingQuery = `?utm_source=${fSource}&utm_medium=${fMedium}&utm_campaign=${fCampaign}&utm_id=${fAssetId}&utm_content=${fContent}`;
                 consultBtn.href = `https://calendly.com/mejia-pas/30min${trackingQuery}`;
                 consultBtn.target = "_blank"; 
                 
                 consultBtn.addEventListener('click', () => {
                     gtag('event', 'contact_click', { 
-                        'asset_id': finalAssetId, 
-                        'agent': utmSource, 
-                        'campaign': utmCampaign,
+                        'asset_id': fAssetId, 
+                        'agent': fSource, 
+                        'campaign': fCampaign,
                         'type': 'CONSULT_CALENDLY' 
                     });
                 });
@@ -313,35 +319,23 @@
             // License Button
             const licenseBtn = document.getElementById('dynamic-license-btn');
             if(licenseBtn) {
-                licenseBtn.href = `mailto:truthengine.ai@gmail.com?subject=Licensing: ${finalAssetId}&body=I am interested in licensing the Truth Engine™ for ${finalAssetId}.`;
+                licenseBtn.href = `mailto:truthengine.ai@gmail.com?subject=Licensing: ${fAssetId}&body=I am interested in licensing the Truth Engine™ for ${fAssetId}.`;
                 licenseBtn.addEventListener('click', () => {
                     gtag('event', 'contact_click', { 
-                        'asset_id': finalAssetId, 
-                        'campaign': utmCampaign,
+                        'asset_id': fAssetId, 
+                        'campaign': fCampaign,
                         'type': 'LICENSE_INQUIRY' 
                     });
                 });
             }
         
-            // Attest Button (Google Review)
+            // Attest Button
             const attestBtn = document.getElementById('dynamic-review-btn');
             if(attestBtn) {
                 const reviewBase = "https://search.google.com/local/writereview?placeid=ChIJ1-Pra3HJt4kRsuAVx8ge7qY";
-                const trackingQuery = `&utm_source=${utmSource || 'direct'}&utm_medium=${utmMedium || 'web'}&utm_campaign=${utmCampaign || 'phase_1'}&utm_id=${finalAssetId}&utm_content=${utmContent || 'not_set'}`;
+                const trackingQuery = `&utm_source=${fSource}&utm_medium=${fMedium}&utm_campaign=${fCampaign}&utm_id=${fAssetId}&utm_content=${fContent}`;
                 
                 attestBtn.href = reviewBase + trackingQuery;
                 attestBtn.target = "_blank";
 
-                attestBtn.addEventListener('click', () => {
-                    gtag('event', 'review_intent', { 
-                        'asset_id': finalAssetId, 
-                        'source': utmSource,
-                        'campaign': utmCampaign,
-                        'content': utmContent 
-                    });
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+                attestBtn
