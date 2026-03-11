@@ -10,46 +10,48 @@
         gtag('config', 'G-X889MYFV7L');
 
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams(window.location.search);
             
-            // 1. Capture the "Who" and the "What"
-            const assetId = urlParams.get('utm_id') || 'unspecified_asset';
-            const clientSource = urlParams.get('utm_source') || 'direct';
-            const destination = urlParams.get('dest'); // This tells the script where to go
+            // 1. Extract Protocol Data
+            const destKey = params.get('dest'); // 'review', 'consult', 'license', or 'dossier'
+            const assetId = params.get('utm_id'); // e.g., 113-middlebeach-06443
+            const agent   = params.get('utm_source');
+            const buyer   = params.get('utm_content');
 
-            // 2. Define the Destinations
-            const paths = {
+            // 2. The Dynamic Path Builder (Following your IV Logic)
+            const dossierPath = `https://truthengineai-blip.github.io/mejia-onestreet.one/${assetId}/welcome/welcome.html`;
+            
+            const targets = {
+                'review': 'https://search.google.com/local/writereview?placeid=ChIJ1-Pra3HJt4kRsuAVx8ge7qY',
                 'consult': 'https://calendly.com/mejia-pas/30min',
-                'license': 'https://truthengine.io/licensing', // Or your specific license page
-                'review': 'https://search.google.com/local/writereview?placeid=ChIJ1-Pra3HJt4kRsuAVx8ge7qY'
+                'license': `mailto:truthengine.ai@gmail.com?subject=Licensing: ${assetId}`,
+                'dossier': dossierPath
             };
 
-            // 3. Map the "Method" for your GA4 Report
             const methodMap = {
+                'review': 'Review Intent',
                 'consult': 'Consult Intent',
                 'license': 'License Intent',
-                'review': 'Review Intent'
+                'dossier': 'Dossier Entry'
             };
 
-            const targetUrl = paths[destination] || 'https://truthengine.io';
-            const methodLabel = methodMap[destination] || 'Email Click';
-
-            // 4. Log the event to your "Clean" report
+            // 3. Log to GA4 Silo
             gtag('event', 'dossier_dissection', {
-                'method': methodLabel,
+                'method': methodMap[destKey] || 'Direct Access',
                 'asset_id': assetId,
-                'source': clientSource,
-                'medium': 'email_universal_bridge'
+                'source': agent,
+                'content': buyer
             });
 
-            // 5. Redirect
+            // 4. Execution
             setTimeout(() => {
-                window.location.replace(targetUrl);
-            }, 500);
+                const finalUrl = targets[destKey] || dossierPath;
+                window.location.href = finalUrl;
+            }, 400);
         };
     </script>
     <style>
-        body { background-color: #000; color: #C5A059; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 0.3em; font-size: 10px; }
+        body { background: #000; color: #C5A059; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: serif; letter-spacing: 0.3em; font-size: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
